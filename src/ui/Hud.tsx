@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import type { GameState, Stat } from '../game/types';
 import { CHAPTERS } from '../game/chapters';
 import { goalStatus, researchRate, runway } from '../game/engine';
-import { qLabel } from '../game/format';
-import { ICON, fmtStat } from './common';
+import { money, num, qLabel } from '../game/format';
+import { FactButton, ICON, Meter, fmtStat } from './common';
 import { isMuted, setMuted, sfx } from '../game/sfx';
 
 const HUD_STATS: Stat[] = ['cash', 'eng', 'gpus', 'users', 'hype', 'safety'];
@@ -44,9 +44,41 @@ export function Hud({ s, onOpen }: { s: GameState; onOpen: () => void }) {
   );
 }
 
-export function Objective({ s, onGoal }: { s: GameState; onGoal: () => void }) {
+function GoalBar({
+  icon,
+  label,
+  value,
+  max,
+  ok,
+  color,
+  extra,
+}: {
+  icon: string;
+  label: string;
+  value: number;
+  max: number;
+  ok: boolean;
+  color: string;
+  extra?: string;
+}) {
+  return (
+    <div className={`goal-bar ${ok ? 'ok' : ''}`}>
+      <span className="goal-bar-label">
+        {icon} {label}
+      </span>
+      <Meter value={value} max={max} color={ok ? '#3ddc97' : color} />
+      <span className="goal-bar-val">
+        {ok ? '✅' : `${num(value)}/${num(max)}`}
+        {extra && !ok && <em>{extra}</em>}
+      </span>
+    </div>
+  );
+}
+
+export function Objective({ s }: { s: GameState }) {
   const ch = CHAPTERS[s.chapter];
   const st = goalStatus(s);
+  const g = st.g;
   const [muted, setM] = useState(isMuted());
   return (
     <div className="objective">
@@ -66,23 +98,40 @@ export function Objective({ s, onGoal }: { s: GameState; onGoal: () => void }) {
           {muted ? '🔇' : '🔊'}
         </button>
       </div>
-      <button className="obj-goal" onClick={() => (sfx('tap'), onGoal())}>
-        {st.trained ? (
-          <span className="obj-done">✅ {st.g.model} trained! {s.freePlay ? 'Free play' : 'Keep going…'}</span>
-        ) : (
+      <div className="goal-panel">
+        <div className="goal-head">
+          <span className="goal-tag">GOAL</span>
+          {st.trained ? (
+            <span className="goal-name done">
+              {g.model} trained! {s.freePlay ? 'Free play' : 'Keep going'}
+            </span>
+          ) : (
+            <span className="goal-name">
+              Train {g.model}
+              <small>{money(g.cost)}</small>
+            </span>
+          )}
+          <FactButton
+            title={g.model}
+            text={`${g.fact} Real history: shipped in ${qLabel(g.histQ)}.`}
+          />
+        </div>
+        {!st.trained && (
           <>
-            <span className="obj-title">🎯 Train {st.g.model}</span>
-            {!st.unlocked && <span className="pill locked">📄🔒</span>}
-            <span className={`pill ${st.researchOk ? 'ok' : ''}`}>
-              🧠 {Math.floor(s.research)}/{st.g.research}
-              <em>+{researchRate(s)}</em>
-            </span>
-            <span className={`pill ${st.gpusOk ? 'ok' : ''}`}>
-              🖥️ {fmtStat('gpus', s.gpus, false)}/{fmtStat('gpus', st.g.gpus, false)}
-            </span>
+            {!st.unlocked && <div className="goal-locked">🔒 {g.lockedHint}</div>}
+            <GoalBar
+              icon="🧠"
+              label="Research"
+              value={Math.floor(s.research)}
+              max={g.research}
+              ok={st.researchOk}
+              color="#b388ff"
+              extra={`+${researchRate(s)}/qtr`}
+            />
+            <GoalBar icon="🖥️" label="GPUs" value={s.gpus} max={g.gpus} ok={st.gpusOk} color="#76b900" />
           </>
         )}
-      </button>
+      </div>
     </div>
   );
 }

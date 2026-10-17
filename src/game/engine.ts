@@ -136,8 +136,7 @@ function setFlags(s: GameState, flags: string[]): GameState {
   return { ...s, flags: { ...s.flags, ...Object.fromEntries(flags.map((f) => [f, true])) }, flagQ };
 }
 
-let toastSeq = 1;
-const toast = (text: string) => ({ id: toastSeq++, text });
+let reportSeq = 1;
 
 export function enqueueEvents(s: GameState): GameState {
   const add = EVENTS.filter(
@@ -180,7 +179,7 @@ export function endQuarter(s: GameState): GameState {
     const growth = (n.hype / 100) * 0.2 + (n.flags.api ? 0.08 : 0) - 0.04;
     n.users = Math.max(0, Math.round(n.users * (1 + growth)));
   }
-  n.report = { id: toastSeq++, q: s.q, net: b.net, research: gain };
+  n.report = { id: reportSeq++, q: s.q, net: b.net, research: gain };
   if (n.cash < 0 && !n.queue.includes('bailout')) {
     if (!n.flags[`bail${n.chapter}`]) n.queue = ['bailout', ...n.queue];
     else n = setFlags(n, ['broke']);
@@ -213,7 +212,6 @@ export function reducer(s: GameState, a: Action): GameState {
       if (card.once) n.used = [...n.used, card.id];
       if (card.sets) n = setFlags(n, [card.sets]);
       if (card.product) n.products = [...n.products, card.product];
-      if (card.fact) n.toast = toast(card.fact);
       n = endQuarter(n);
       return n;
     }
@@ -299,7 +297,6 @@ export function reducer(s: GameState, a: Action): GameState {
         eng: s.eng + next.joins.length,
         vcVisits: {},
         chapterStartQ: s.q,
-        toast: undefined,
         report: undefined,
       };
       n.hand = drawHand(n);
@@ -336,7 +333,7 @@ const CHECKPOINT = 'aiarms.checkpoint.v1';
 
 export function save(s: GameState) {
   try {
-    localStorage.setItem(SAVE, JSON.stringify({ ...s, toast: undefined, report: undefined }));
+    localStorage.setItem(SAVE, JSON.stringify({ ...s, report: undefined }));
   } catch {
     /* storage unavailable */
   }
@@ -344,7 +341,7 @@ export function save(s: GameState) {
 
 export function saveCheckpoint(s: GameState) {
   try {
-    localStorage.setItem(CHECKPOINT, JSON.stringify({ ...s, toast: undefined, report: undefined }));
+    localStorage.setItem(CHECKPOINT, JSON.stringify({ ...s, report: undefined }));
   } catch {
     /* storage unavailable */
   }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Goal } from '../game/types';
 import { money } from '../game/format';
-import { Btn, Fact } from './common';
+import { Btn, FactButton } from './common';
 import { sfx } from '../game/sfx';
 
 const DURATION = 3600;
@@ -66,8 +66,8 @@ export function TrainSequence({ goal, onDone }: { goal: Goal; onDone: () => void
               <span>🤖 {goal.model}</span>
               <span>{goal.params} params</span>
               <span>{money(goal.cost)} compute</span>
+              <FactButton title={goal.model} text={goal.fact} />
             </div>
-            <Fact>{goal.fact}</Fact>
             <Btn variant="gold" onClick={onDone} sound="coin">
               Ship it 🚀
             </Btn>

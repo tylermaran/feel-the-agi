@@ -6,7 +6,7 @@ import { Character } from '../art/Sprite';
 import { R } from '../art/pixels';
 import { MapView } from '../art/MapView';
 import { money, num, qLabel } from '../game/format';
-import { Btn, Fact } from './common';
+import { Btn, FactButton } from './common';
 import { newGame } from '../game/engine';
 
 export function TitleScreen({ hasSave, onNew, onContinue }: { hasSave: boolean; onNew: () => void; onContinue: () => void }) {
@@ -220,7 +220,6 @@ export function GameOver({ onRetry, onNew }: { onRetry: () => void; onNew: () =>
       <div className="go-skull">💀</div>
       <h2>OUT OF CASH</h2>
       <p>Even AGI needs payroll.</p>
-      <Fact>Most startups don't die from competition. They run out of runway.</Fact>
       <Btn variant="gold" onClick={onRetry}>
         Retry chapter
       </Btn>
@@ -236,7 +235,13 @@ export function Finale({ s, onFree, onNew }: { s: GameState; onFree: () => void;
   return (
     <div className="screen finale">
       <div className="complete-badge">CHAPTER 3 COMPLETE</div>
-      <h2>The race is ON.</h2>
+      <h2>
+        The race is ON.{' '}
+        <FactButton
+          title="Anthropic"
+          text="Anthropic launched in 2021 with $124M. Its first model would be named Claude."
+        />
+      </h2>
       <p className="finale-text">
         {s.safety >= 60
           ? 'Your safety cred kept most of the team. But Dario has a head start on "safe AI."'
@@ -260,7 +265,6 @@ export function Finale({ s, onFree, onNew }: { s: GameState; onFree: () => void;
           {Math.round(s.safety)}
         </div>
       </div>
-      <Fact>Anthropic launched in 2021 with $124M. Its first model would be named Claude.</Fact>
       <div className="teaser big">
         TO BE CONTINUED…
         <br />
@@ -287,9 +291,10 @@ export function ChapterIntro({ s, onDone }: { s: GameState; onDone: () => void }
         <div className="event-art">
           <span className="event-emoji">{ch.intro.emoji}</span>
         </div>
-        <h2 className="event-title">{ch.intro.title}</h2>
+        <h2 className="event-title">
+          {ch.intro.title} <FactButton title={ch.intro.title} text={ch.intro.fact} />
+        </h2>
         <p className="event-text">{ch.intro.text}</p>
-        {ch.intro.fact && <Fact>{ch.intro.fact}</Fact>}
         <div className="goal-preview">
           🎯 Goal: train <b>{ch.goal.model}</b> ({ch.goal.params} params)
         </div>

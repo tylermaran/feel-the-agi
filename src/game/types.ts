@@ -167,7 +167,6 @@ export interface GameState {
   boughtQ: number;
   vcVisits: Record<string, number>;
   products: string[];
-  toast?: { id: number; text: string };
   report?: Report;
   chapterStartQ: number;
   freePlay?: boolean;

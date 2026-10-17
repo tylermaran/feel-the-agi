@@ -4,7 +4,7 @@ import { chapterOf } from '../game/engine';
 import { PEOPLE } from '../game/people';
 import { Portrait } from '../art/Sprite';
 import { qLabel } from '../game/format';
-import { Btn, Fact, FxChips } from './common';
+import { Btn, FactButton, FxChips } from './common';
 import { sfx } from '../game/sfx';
 
 export function EventModal({ s, ev, onChoose }: { s: GameState; ev: GameEvent; onChoose: (i: number) => void }) {
@@ -21,9 +21,10 @@ export function EventModal({ s, ev, onChoose }: { s: GameState; ev: GameEvent; o
           {person ? <Portrait look={person.look} size={84} /> : <span className="event-emoji">{ev.emoji}</span>}
           {person && <span className="event-badge">{ev.emoji}</span>}
         </div>
-        <h2 className="event-title">{ev.title}</h2>
+        <h2 className="event-title">
+          {ev.title} <FactButton title={ev.title} text={ev.fact} />
+        </h2>
         <p className="event-text">{text}</p>
-        {ev.fact && <Fact>{ev.fact}</Fact>}
         <div className="event-choices">
           {ev.choices.map((c, i) => {
             const fx =

@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import type { ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import type { Fx, Stat } from '../game/types';
 import { money, num } from '../game/format';
 import { sfx } from '../game/sfx';
@@ -103,12 +105,36 @@ export function Btn({
   );
 }
 
-export function Fact({ children }: { children: ReactNode }) {
+export function FactButton({ title, text }: { title: string; text?: string }) {
+  const [open, setOpen] = useState(false);
+  if (!text) return null;
   return (
-    <div className="fact">
-      <span className="fact-icon">💡</span>
-      <span>{children}</span>
-    </div>
+    <>
+      <button
+        className="fact-btn"
+        aria-label={`Real history: ${title}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          sfx('tap');
+          setOpen(true);
+        }}
+      >
+        💡
+      </button>
+      {open &&
+        createPortal(
+          <div className="factpop-backdrop" onClick={() => setOpen(false)}>
+            <div className="factpop pixel-box pop" onClick={(e) => e.stopPropagation()}>
+              <div className="factpop-head">💡 {title}</div>
+              <p>{text}</p>
+              <Btn variant="secondary" onClick={() => setOpen(false)}>
+                Got it
+              </Btn>
+            </div>
+          </div>,
+          document.body,
+        )}
+    </>
   );
 }
 

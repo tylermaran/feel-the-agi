@@ -20,14 +20,13 @@ import { DataCenterScene } from './art/DataCenter';
 import { MapView } from './art/MapView';
 import type { Loc } from './art/MapView';
 import { Hud, Objective } from './ui/Hud';
-import { Ticker } from './ui/Ticker';
 import { ActionBar, CardTray } from './ui/CardTray';
 import { EventModal } from './ui/EventModal';
 import { StatsPanel } from './ui/StatsPanel';
 import { GpuSheet, HireSheet } from './ui/Shops';
 import { Fundraise } from './ui/Fundraise';
 import { TrainSequence } from './ui/TrainSequence';
-import { GoalSheet, ItemSheet, PersonSheet, RivalSheet } from './ui/InfoSheets';
+import { ItemSheet, PersonSheet, RivalSheet } from './ui/InfoSheets';
 import { ChapterComplete, ChapterIntro, Finale, GameOver, IntroSlides, TitleScreen, VsScreen } from './ui/Screens';
 import { Btn, Sheet } from './ui/common';
 
@@ -36,7 +35,6 @@ type Overlay =
   | { k: 'hire' }
   | { k: 'gpus' }
   | { k: 'raise' }
-  | { k: 'goal' }
   | { k: 'item'; id: string }
   | { k: 'person'; id: string }
   | { k: 'rival'; id: string }
@@ -60,20 +58,12 @@ export default function App() {
   const [training, setTraining] = useState(false);
   const [chapterIntro, setChapterIntro] = useState(false);
   const [vs, setVs] = useState(false);
-  const [toast, setToast] = useState<{ id: number; text: string } | null>(null);
   const [report, setReport] = useState<GameState['report'] | null>(null);
   const [tip, setTip] = useState(false);
 
   useEffect(() => {
     if (screen === 'game') save(s);
   }, [s, screen]);
-
-  useEffect(() => {
-    if (!s.toast) return;
-    setToast(s.toast);
-    const t = setTimeout(() => setToast(null), 5000);
-    return () => clearTimeout(t);
-  }, [s.toast]);
 
   useEffect(() => {
     if (!s.report) return;
@@ -189,7 +179,6 @@ export default function App() {
             saveCheckpoint(n);
             setView('hq');
             setReport(null);
-            setToast(null);
             setChapterIntro(true);
           }}
         />
@@ -229,8 +218,7 @@ export default function App() {
     <Shell>
       <div className="game">
         <Hud s={s} onOpen={() => setOverlay({ k: 'stats' })} />
-        <Objective s={s} onGoal={() => setOverlay({ k: 'goal' })} />
-        <Ticker s={s} />
+        <Objective s={s} />
         <main className="viewport" style={{ background: view === 'map' ? '#2b59c3' : SCENE_BG[ch.hq] }}>
           {view === 'map' ? (
             <MapView s={s} onLocation={onLocation} />
@@ -247,11 +235,6 @@ export default function App() {
               {qLabel(report.q)} done · 🧠+{report.research} · {money(report.net, true)}
             </div>
           )}
-          {toast && (
-            <button className="toast" key={toast.id} onClick={() => setToast(null)}>
-              💡 {toast.text}
-            </button>
-          )}
           {tip && !busy && (
             <button
               className="toast tip"
@@ -260,7 +243,7 @@ export default function App() {
                 setTip(false);
               }}
             >
-              👋 Hire & buy GPUs anytime. Playing a card ends the quarter. Tap people & objects for fun facts! ✕
+              👋 Pick a card to end the quarter. Tap people & things! ✕
             </button>
           )}
         </main>
@@ -296,7 +279,6 @@ export default function App() {
             }}
           />
         )}
-        {overlay?.k === 'goal' && <GoalSheet s={s} onClose={close} />}
         {overlay?.k === 'item' && <ItemSheet id={overlay.id} s={s} onClose={close} />}
         {overlay?.k === 'person' && <PersonSheet id={overlay.id} s={s} onClose={close} />}
         {overlay?.k === 'rival' && <RivalSheet id={overlay.id} s={s} onClose={close} />}

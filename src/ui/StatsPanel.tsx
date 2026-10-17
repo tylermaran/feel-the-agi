@@ -147,7 +147,7 @@ export function StatsPanel({ s, onClose }: { s: GameState; onClose: () => void }
       <section className="panel-sec">
         <h3>🏁 Rival news</h3>
         {NEWS.filter((n) => n.q <= s.q)
-          .slice(-6)
+          .slice(-3)
           .reverse()
           .map((n, i) => (
             <Row key={i} k={`${qLabel(n.q)} · ${n.text}`} v={n.org} />
